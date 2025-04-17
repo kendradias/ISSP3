@@ -1,0 +1,59 @@
+docusign-data-transfer/
+│
+├── .env
+├── .env.example
+├── .dockerignore
+├── .gitignore
+├── CONTRIBUTING.md
+├── Dockerfile
+├── docker-compose.yml
+├── README.md
+├── package.json
+│
+├── src/
+│   ├── app.js
+│   ├── server.js
+│   │
+│   ├── config/
+│   │   ├── api.js
+│   │   ├── database.js
+│   │   └── docusign.js
+│   │
+│   ├── controllers/
+│   │   ├── dataController.js
+│   │   └── webhookController.js
+│   │
+│   ├── docusign/
+│   │   ├── envelopeParser.js
+│   │   └── webhookHandler.js
+│   │
+│   ├── middleware/
+│   │   ├── authentication.js
+│   │   └── validation.js
+│   │
+│   ├── models/
+│   │   └── formData.js
+│   │
+│   ├── routes/
+│   │   ├── dataRoutes.js
+│   │   └── webhookRoutes.js
+│   │
+│   ├── services/
+│   │   ├── apiService.js
+│   │   ├── databaseService.js
+│   │   └── docusignService.js
+│   │
+│   └── utils/
+│       ├── errorHandler.js
+│       └── logger.js
+│
+├── data/
+│   └── samples/
+│       └── sampleEnvelope.json
+│
+├── logs/
+│
+└── tests/
+    ├── api.test.js
+    ├── database.test.js
+    └── docusign.test.js
