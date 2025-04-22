@@ -4,8 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const { getAccessToken } = require('../services/docusignTokenService');
-
-
+const envelopeFormData = require('../models/formData');
 
 const handleWebhook = async (req, res) => {
   try {
@@ -56,18 +55,18 @@ const handleWebhook = async (req, res) => {
     const writer = fs.createWriteStream(filePath);
     pdfResponse.data.pipe(writer);
 
-    // writer.on('finish', async () => {
-    //   const user = new User({
-    //     envelopeId,
-    //     signerEmail,
-    //     pdfPath: filePath,
-    //     status: envelopeData.envelopeSummary.status,
-    //     formData,
-    //   });
-    //   await user.save();
-    //   console.log('Data saved to MongoDB');
-    //   res.status(200).send('Webhook handled successfully');
-    // });
+    writer.on('finish', async () => {
+      const newData = new envelopeFormData({
+        envelopeId,
+        signerEmail,
+        pdfPath: filePath,
+        status: envelopeData.envelopeSummary.status,
+        formData,
+      });
+      await newData.save();
+      console.log('Data saved to MongoDB');
+      res.status(200).send('Webhook handled successfully');
+    });
 
     writer.on('error', (err) => {
       console.error('Error saving PDF:', err);
