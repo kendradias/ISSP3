@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 require('dotenv').config();
 
-const privateKey = fs.readFileSync('../Keys/private.key');
+const privateKeyPath = process.env.PRIVATE_KEY_PATH;
+const privateKey = fs.readFileSync(privateKeyPath);
 
 const createJWT = ({clientId, userId}) =>{
     const now = Math.floor(Date.now()/1000);
