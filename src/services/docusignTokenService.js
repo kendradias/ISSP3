@@ -23,7 +23,7 @@ const createJWT = ({clientId, userId}) =>{
 const getAccessToken = async({clientId, userId})=>{
     const jwtAssertion = createJWT({clientId, userId});
 
-    const params = newSearchParams();
+    const params = new URLSearchParams();
     params.append('grant-type', 'urn:ietf:params:oauth:grant-type:jwt-bearer');
     params.append('assertion', jwtAssertion)
 
