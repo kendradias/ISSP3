@@ -92,3 +92,7 @@ node scripts/generate-consent-url.js
 ```
 Visit the URL in your browser while logged in as a DocuSign admin
 
+Run the api.test.js
+```bash
+npm run test:api
+```
