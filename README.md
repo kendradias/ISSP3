@@ -78,3 +78,21 @@ For development with auto-restart:
 npm install -g nodemon
 nodemon src/server.js
 ```
+
+## Testing the Application
+Install Jest for testing: 
+
+```bash
+npm install --save-dev jest
+```
+
+Generate a consent URL:
+```bash
+node scripts/generate-consent-url.js
+```
+Visit the URL in your browser while logged in as a DocuSign admin
+
+Run the api.test.js
+```bash
+npm run test:api
+```
