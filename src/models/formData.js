@@ -10,7 +10,8 @@ const formDataSchema = new mongoose.Schema({
         of: String,  ///store dynamic form field as key-value pairs
         required: true
     },
-    createdAt:{type:Date, default:Date.now} 
+    createdAt:{type:Date, default:Date.now} ,
+    completedAt:{type:Date, required:true}
 })
 
 const envelopeFormData = mongoose.model('envelopeFormData', formDataSchema);
