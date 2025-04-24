@@ -22,4 +22,41 @@ export class NotificationService {
             }
         })
     }
+    async sendStatusNotification(statusHistory: IStatusHistory): Promise<boolean> {
+        try {
+            const notification = this.createStatusEmail(statusHistory);
+            await this.transporter.sendEmail({
+                from: process.env.EMAIL_FROM,
+                to: statusHistory.signerEmail,
+                subject: notification.subject,
+                text: notification.text,
+                html: notification.html
+            });
+
+            await StatusHistory.findByIdAndUpdate(statusHistory._id, {
+                notificationSent: true,
+                notificationTimestamp: new Date()
+            });
+
+            return true;
+        } catch(error) {    
+            console.error("Error sending notification: ", error)
+            return false;
+        }
+    }
+    private createStatusEmail(statusHistory: IStatusHistory): EmailNotification {
+        const subject = `Document Status Update: ${statusHistory.status}`;
+        const text = `Your Document (Envelope IS: ${statusHistory.envelopeId}) is now ${statusHistory.status}`;
+
+            // HTML version of the email could be created here
+        const html = `
+        <h2>Document Status Update</h2>
+        <p>Your document (Envelope ID: <strong>${statusHistory.envelopeId}</strong>) 
+        status is now: <strong>${statusHistory.status}</strong></p>
+        <p>Time: ${statusHistory.timestamp.toLocaleString()}</p>
+        `;
+
+
+        return { to: statusHistory.signerEmail, subject, text, html };
+    }
 }
