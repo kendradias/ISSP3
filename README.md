@@ -22,6 +22,7 @@ cd docusign-data-transfer
 
 ```bash
 npm install mongoose express dotenv
+npm install --save-dev @types/node @types/express @types/mongoose @types/nodemailer
 ```
 
 Core dependencies:
