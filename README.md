@@ -85,3 +85,10 @@ Install Jest for testing:
 ```bash
 npm install --save-dev jest
 ```
+
+Generate a consent URL:
+```bash
+node scripts/generate-consent-url.js
+```
+Visit the URL in your browser while logged in as a DocuSign admin
+
