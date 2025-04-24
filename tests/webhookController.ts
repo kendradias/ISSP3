@@ -5,12 +5,14 @@ import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 //import { getAccessToken } from '../services/docusignTokenService';
 //import envelopeFormData from '../models/formData';
-
+import { StatusHistory } from '../src/models/statusHistory';
+import { NotificationService } from '../src/services/notificationService'; 
 import { getAccessToken } from './docusignTokenService';
 import envelopeFormData from './formData';
 
-
 dotenv.config();
+
+const notificationService = new NotificationService();
 
 export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -60,6 +62,23 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
       fs.mkdirSync(pdfDir);
     }
 
+    // Track status change
+    const previousStatus = await getLatestStatus(envelopeId);
+    const newStatus = envelopeData.envelopeSummary.status;
+    
+    // Only record if status has changed
+    if (previousStatus !== newStatus) {
+      const statusHistory = await StatusHistory.create({
+        envelopeId,
+        signerEmail,
+        status: newStatus,
+        previousStatus
+      });
+    // Send notification for status change
+    await notificationService.sendStatusNotification(statusHistory);
+      console.log(`Status notification sent for envelope ${envelopeId}`);
+    }
+
     const filePath = path.join(pdfDir, `${envelopeId}.pdf`);
     const writer = fs.createWriteStream(filePath);
 
@@ -74,6 +93,14 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
         formData,
       });
       await newData.save();
+      // Update status history to link to the saved document 
+      if (newData._id) {
+        await StatusHistory.updateOne(
+          { envelopeId, status: envelopeData.envelopeSummary.status },
+          { $set: { documentId: newData._id } }
+        );
+      }
+
       console.log('Data saved to MongoDB');
       res.status(200).send('Webhook handled successfully');
     });
@@ -88,3 +115,12 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
     res.status(500).send('Internal server error');
   }
 };
+
+// Helper function to get the latest status
+async function getLatestStatus(envelopeId: string): Promise<string | null> {
+  const latestStatus = await StatusHistory.findOne({ envelopeId })
+    .sort({ timestamp: -1 })
+    .limit(1);
+  
+  return latestStatus ? latestStatus.status : null;
+}
