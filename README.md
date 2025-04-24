@@ -78,3 +78,10 @@ For development with auto-restart:
 npm install -g nodemon
 nodemon src/server.js
 ```
+
+## Testing the Application
+Install Jest for testing: 
+
+```bash
+npm install --save-dev jest
+```

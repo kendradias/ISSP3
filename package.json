@@ -5,9 +5,12 @@
   "directories": {
     "test": "tests"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+ "scripts": {
+  "test": "jest",
+  "test:api": "jest tests/api.test.js",
+  "test:docusign": "jest tests/docusign.test.js",
+  "start": "node app.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -20,5 +23,8 @@
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

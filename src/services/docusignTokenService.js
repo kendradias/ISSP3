@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 require('dotenv').config();
 
-const privateKeyPath = process.env.PRIVATE_KEY_PATH;
+const privateKeyPath = process.env.DOCUSIGN_PRIVATE_KEY_PATH;
 const privateKey = fs.readFileSync(privateKeyPath);
 
 const createJWT = ({clientId, userId}) =>{
@@ -23,9 +23,9 @@ const createJWT = ({clientId, userId}) =>{
 const getAccessToken = async({clientId, userId})=>{
     const jwtAssertion = createJWT({clientId, userId});
 
-    const params = newSearchParams();
-    params.append('grant-type', 'urn:ietf:params:oauth:grant-type:jwt-bearer');
-    params.append('assertion', jwtAssertion)
+    const params = new URLSearchParams();
+params.append('grant_type', 'urn:ietf:params:oauth:grant-type:jwt-bearer');
+params.append('assertion', jwtAssertion);
 
     const response = await axios.post(process.env.TOKEN_URL, params, {
         headers: {'Content-Type' : 'application/x-www-form-urlencoded'},
