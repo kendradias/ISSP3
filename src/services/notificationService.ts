@@ -25,7 +25,7 @@ export class NotificationService {
     async sendStatusNotification(statusHistory: IStatusHistory): Promise<boolean> {
         try {
             const notification = this.createStatusEmail(statusHistory);
-            await this.transporter.sendEmail({
+            await this.transporter.sendMail({
                 from: process.env.EMAIL_FROM,
                 to: statusHistory.signerEmail,
                 subject: notification.subject,
