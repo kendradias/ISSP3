@@ -6,19 +6,27 @@ require('dotenv').config();
 const privateKeyPath = process.env.DOCUSIGN_PRIVATE_KEY_PATH;
 const privateKey = fs.readFileSync(privateKeyPath);
 
-const createJWT = ({clientId, userId}) =>{
-    const now = Math.floor(Date.now()/1000);
-    const payload = {
-        iss: clientId,
-        sub: userId,
-        aud: 'account-d.docusign.com',
-        iat: now,
-        exp: now + 3600, //1hour
-        scope: 'signature impersonation'
-    };
-    return jwt.sign(payload, privateKey, {algorithm: 'RS256'})
+const createJWT = ({ clientId, userId }) => {
+    try {
+        const now = Math.floor(Date.now() / 1000);
+        const payload = {
+          iss: clientId,
+          sub: userId,
+          aud: 'account-d.docusign.com',
+          iat: now,
+          exp: now + 3600,  // Expires in 1 hour
+          scope: 'signature impersonation'
+        };
+    
+        console.log("JWT Payload:", payload); 
+        const jwtAssertion = jwt.sign(payload, privateKey, { algorithm: 'RS256' });
+        console.log("Generated JWT:", jwtAssertion); 
+        return jwtAssertion;
+      } catch (error) {
+        console.error("Error creating JWT:", error.message);
+        throw new Error('Error creating JWT');
+      }
 };
-
 
 const getAccessToken = async({clientId, userId})=>{
     const jwtAssertion = createJWT({clientId, userId});
@@ -34,5 +42,4 @@ params.append('assertion', jwtAssertion);
     return response.data.access_token;
 }
 
-
-module.exports = { getAccessToken}
+module.exports = { getAccessToken };
