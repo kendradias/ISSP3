@@ -241,4 +241,64 @@ describe('DocuSign API Tests', () => {
       throw error;
     }
   }, 15000);
+
+
+  test('Should verify specific form_data endpoint with hardcoded ID', async () => {
+    // Skip if authentication failed
+    if (!accessToken) {
+      console.log('Skipping specific form_data test due to missing access token');
+      return;
+    }
+    
+    try {
+      // Using the specific envelope ID from your question
+      const specificEnvelopeId = '7f957bdd-1293-440c-8679-f4101a630385';
+      // Using the specific account ID from your question - can also be replaced with accountId variable
+      const specificAccountId = '470d6ee5-32c0-4eda-9f34-249fb8e85ec6';
+      
+      const formDataUrl = `${process.env.DOCUSIGN_BASE_URI}/v2.1/accounts/${specificAccountId}/envelopes/${specificEnvelopeId}/form_data`;
+      console.log(`Testing specific form_data endpoint: ${formDataUrl}`);
+      
+      const formDataResponse = await axios.get(formDataUrl, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Specific form data response status:', formDataResponse.status);
+      expect(formDataResponse.status).toBe(200);
+      
+      // Log the structure of the response for debugging
+      console.log('Form data response structure:', JSON.stringify(formDataResponse.data, null, 2));
+      
+      // Add assertions based on expected data structure
+      expect(formDataResponse.data).toBeDefined();
+      // Check if formData property exists (might need adjustment based on actual response)
+      if (formDataResponse.data.formData) {
+        console.log(`Form contains ${formDataResponse.data.formData.length} fields`);
+        // Optionally log some field names
+        if (formDataResponse.data.formData.length > 0) {
+          console.log('Sample field names:', 
+            formDataResponse.data.formData
+              .slice(0, 5)
+              .map(field => field.name)
+              .join(', ')
+          );
+        }
+      }
+      
+    } catch (error) {
+      console.error('Specific Form Data Test Error:', error.message);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', JSON.stringify(error.response.data, null, 2));
+      } else if (error.request) {
+        console.error('No response received');
+      } else {
+        console.error('Error setting up request:', error.message);
+      }
+      throw error;
+    }
+  }, 10000);
 });
