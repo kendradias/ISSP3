@@ -17,10 +17,7 @@ const createJWT = ({ clientId, userId }) => {
           exp: now + 3600,  // Expires in 1 hour
           scope: 'signature impersonation'
         };
-    
-        console.log("JWT Payload:", payload); 
         const jwtAssertion = jwt.sign(payload, privateKey, { algorithm: 'RS256' });
-        console.log("Generated JWT:", jwtAssertion); 
         return jwtAssertion;
       } catch (error) {
         console.error("Error creating JWT:", error.message);
@@ -31,7 +28,6 @@ const createJWT = ({ clientId, userId }) => {
 const getAccessToken = async ({ clientId, userId }) => {
     try {
         const jwtAssertion = createJWT({ clientId, userId });
-        console.log("Generated JWT:", jwtAssertion);
     
         const params = new URLSearchParams();
         params.append('grant_type', 'urn:ietf:params:oauth:grant-type:jwt-bearer'); 
@@ -40,9 +36,7 @@ const getAccessToken = async ({ clientId, userId }) => {
         const response = await axios.post(process.env.TOKEN_URL, params, {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
-    
-        console.log("Access Token Response:", response.data);
-    
+       
         // Return the access token
         return response.data.access_token;
       } catch (error) {
