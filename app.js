@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const connectDB = require('./src/config/database');
 const router = require('./src/routes/webhookRoutes');
+const { startCronJobs } = require('./src/utils/cron');
 
 require('dotenv').config();
 const app = express();
@@ -13,7 +14,12 @@ app.use(bodyParser.json({limit:'50mb'}));
 app.use(express.urlencoded({extended:true}));
 
 // Connect to MongoDB
-connectDB();
+connectDB().then(() => {
+  console.log('MongoDB connected');
+  startCronJobs(); // Start polling for missed envelopes only after DB is ready
+}).catch(err => {
+  console.error('Failed to connect to MongoDB', err);
+});
 
 // Define routes
 app.get('/', (req, res) => {
