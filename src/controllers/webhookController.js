@@ -1,3 +1,4 @@
+const envelopeFormData = require("../models/formData");
 const { saveFormDataToDB } = require("../services/databaseService");
 const { downloadEnvelopePDF, getFormData } = require("../services/docuSignService");
 const { getAccessToken } = require("../services/docusignTokenService");
@@ -14,6 +15,13 @@ const handleWebhook = async (req, res) => {
     const envelopeId = envelopeData.envelopeId;
     const accountId = envelopeData.accountId;
 
+    // Check if envelope is already saved
+    const existingRecord = await envelopeFormData.findOne({ envelopeId });
+    if (existingRecord && existingRecord.formData && existingRecord.pdfPath) {
+      console.log("Envelope already saved.");
+      return res.status(200).send("Envelope already processed");
+    }
+
     const accessToken = await getAccessToken({
       clientId: process.env.CLIENT_ID,
       userId: process.env.DOCUSIGN_USER_ID,
@@ -21,6 +29,7 @@ const handleWebhook = async (req, res) => {
 
     const { formData, signerEmail } = await getFormData(accessToken, accountId, envelopeId);
 
+    console.log(formData, signerEmail);
     const pdfPath = await downloadEnvelopePDF(accessToken, accountId, envelopeId);
 
     await saveFormDataToDB({

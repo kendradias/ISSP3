@@ -1,9 +1,13 @@
 const axios = require('axios');
 const { getLatestCompletedAt, saveFormDataToDB } = require('./databaseService');
 const envelopeFormData = require('../models/formData');
+const { getAccessToken } = require('./docusignTokenService');
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+const { savePDF } = require('../utils/pdfUtils');
 
-const getFormData = async (accountId, envelopeId, accessToken) => {
+const getFormData = async (accessToken, accountId, envelopeId) => {
     try {
         const url = `${process.env.DOCUSIGN_API_BASE}/v2.1/accounts/${accountId}/envelopes/${envelopeId}/form_data`;
         const response = await axios.get(url, {
@@ -35,7 +39,14 @@ const downloadEnvelopePDF = async (accessToken, accountId, envelopeId) => {
         responseType: 'stream',
     });
 
-    const pdfPath = path.join(__dirname, `../pdfs/${envelopeId}.pdf`);
+    const pdfDir = path.join(__dirname, '../pdfs');
+    const pdfPath = path.join(pdfDir, `${envelopeId}.pdf`);
+
+    // Ensure the directory exists
+    if (!fs.existsSync(pdfDir)) {
+        fs.mkdirSync(pdfDir, { recursive: true });
+      }
+    
     await savePDF(response.data, pdfPath);
     return pdfPath;
 };
@@ -44,8 +55,7 @@ const recoverMissedEnvelopes = async () => {
     try {
         const lastSaved = await getLatestCompletedAt();
         const fromDate = lastSaved?.toISOString() || new Date(Date.now() - 86400000).toISOString(); // fallback to 24hrs ago
-
-        const accessToken = await getAcessToken({
+        const accessToken = await getAccessToken({
             clientId: process.env.CLIENT_ID,
             userId: process.env.DOCUSIGN_USER_ID,
         });
@@ -56,36 +66,41 @@ const recoverMissedEnvelopes = async () => {
             headers: { Authorization: `Bearer ${accessToken}` },
         });
 
-        for (const envelope of response.data.envelopes) {
+        const envelopes = response.data.envelopes || [];
+        let processedCount = 0;
+
+        for (const envelope of envelopes) {
             const exists = await envelopeFormData.findOne({ envelopeId: envelope.envelopeId });
-            if (exists && exists.formData && exists.pdfPath) continue; // Already processed 
+            if (exists && exists.formData && exists.pdfPath) continue; // Already saved
 
             console.log(`Recovering missed envelope: ${envelope.envelopeId}`);
             await processEnvelope(envelope.envelopeId, accessToken, envelope.completedDateTime);
+            processedCount++;
         }
-        console.log('envelope processed successfully');
+
+        if (processedCount === 0) {
+            console.log('No new envelopes to save.');
+        } else {
+            console.log(`${processedCount} envelope(s) processed and saved.`);
+        }
 
     } catch (error) {
-        console.error('Recovery error:', error.message);
+        console.error('Recovery error:', error);
     }
-} 
+}
 
-const  processEnvelope = async(envelopeId, accessToken, completedDateTime)=>{
+const processEnvelope = async (envelopeId, accessToken, completedDateTime) => {
     const accountId = process.env.ACCOUNT_ID;
     const { formData, signerEmail } = await getFormData(accessToken, accountId, envelopeId);
     const pdfPath = await downloadEnvelopePDF(accessToken, accountId, envelopeId);
-     await saveFormDataToDB({
-          envelopeId,
-          signerEmail,
-          status: 'completed',
-          pdfPath,
-          formData,
-          completedAt: completedDateTime
-        });
-    
-    console.log('pending envelope saved');
-    
+    await saveFormDataToDB({
+        envelopeId,
+        signerEmail,
+        status: 'completed',
+        pdfPath,
+        formData,
+        completedAt: completedDateTime
+    });
 }
-
 
 module.exports = { getFormData, downloadEnvelopePDF, recoverMissedEnvelopes }
