@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { startCronJobs } = require('../utils/cron');
 require('dotenv').config();
 
 // Get connection string from environment variables
@@ -23,6 +24,7 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(connectionString, options);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    startCronJobs();
     return conn;
   } catch (error) {
     console.error(`Error connecting to MongoDB: ${error.message}`);
