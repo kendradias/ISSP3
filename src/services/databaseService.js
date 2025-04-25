@@ -35,6 +35,4 @@ const getLatestCompletedAt = async() => {
     }
 
 
-
-
 module.exports = { saveFormDataToDB, getLatestCompletedAt };
