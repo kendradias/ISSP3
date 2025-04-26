@@ -16,7 +16,7 @@ async function testEmailNotification() {
     // Create a test status history document
     const statusHistory = new StatusHistory({
       envelopeId: 'test-envelope-123',
-      signerEmail: 'your-test-email@example.com', // Use your actual email here
+      signerEmail: 'kendra.dias@hotmail.com', 
       status: 'completed',
       previousStatus: 'sent',
       timestamp: new Date()
