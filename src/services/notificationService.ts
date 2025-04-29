@@ -20,7 +20,7 @@ export class NotificationService {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
             },
-            // Added this line to use Outlook
+             // Added this line to use Outlook
             tls: {
             ciphers: 'SSLv3',
             rejectUnauthorized: false
