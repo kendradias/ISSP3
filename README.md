@@ -7,6 +7,7 @@ This project automates data transfer from DocuSign web forms to a MongoDB databa
 - Node.js (v14 or higher)
 - npm (v6 or higher)
 - MongoDB Atlas account (or other MongoDB deployment)
+- Gmail email address (for SMTP/nodemailer)
 - DocuSign Developer account
 
 ## Initial Setup
@@ -42,6 +43,8 @@ Edit the `.env` file with your actual credentials:
 - MongoDB connection details
 - DocuSign integration keys
 - API endpoints
+- SMTP Credentials 
+-
 
 ### 4. MongoDB Connection
 
@@ -79,3 +82,9 @@ For development with auto-restart:
 npm install -g nodemon
 nodemon src/server.js
 ```
+
+## Testing
+To test the notification service and db connection:
+npx ts-node scripts/testNotification.ts 
+
+
