@@ -19,7 +19,12 @@ export class NotificationService {
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
-            }
+            },
+             // Added this line to use Outlook
+            tls: {
+            ciphers: 'SSLv3',
+            rejectUnauthorized: false
+        }
         })
     }
     async sendStatusNotification(statusHistory: IStatusHistory): Promise<boolean> {
