@@ -134,6 +134,8 @@ export const processEnvelope = async (
             completedAt: completedDateTime
         });
 
+        
+
         // Create or update the status history
         const previousStatus = await StatusHistory.findOne({ envelopeId }).sort({ timestamp: -1 });
         const newStatus = 'completed';
@@ -150,17 +152,35 @@ export const processEnvelope = async (
         await statusHistory.save();
         console.log(`Status history record created for envelope ${envelopeId}`);
 
-        // Send a notification
+        // Initialize NotificationService
         const notificationService = new NotificationService();
-        const result = await notificationService.sendStatusNotification(statusHistory);
 
-        if (result) {
-            console.log(`Notification sent for envelope ${envelopeId}`);
+        // Send a notification to the customer (signer)
+        if (signerEmail) {
+            const customerNotificationResult = await notificationService.sendStatusNotification(statusHistory);
+            if (customerNotificationResult) {
+                console.log(`Notification sent to customer (signer) for envelope ${envelopeId}`);
+            } else {
+                console.error(`Failed to send notification to customer (signer) for envelope ${envelopeId}`);
+            }
         } else {
-            console.error(`Failed to send notification for envelope ${envelopeId}`);
+            console.warn(`No signer email found for envelope ${envelopeId}. Skipping customer notification.`);
         }
-    } catch (error: unknown) {
-        console.error(`Error processing envelope ${envelopeId}:`, error);
-    }
-}
 
+        // Send a notification to the form issuer (sender)
+        const formIssuerEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
+        const senderNotificationResult = await notificationService.sendSenderNotification(
+            formIssuerEmail,
+            envelopeId,
+            newStatus
+        );
+
+        if (senderNotificationResult) {
+            console.log(`Notification sent to form issuer for envelope ${envelopeId}`);
+        } else {
+            console.error(`Failed to send notification to form issuer for envelope ${envelopeId}`);
+        }
+        } catch (error: unknown) {
+        console.error(`Error processing envelope ${envelopeId}:`, error);
+        }
+};

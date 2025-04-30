@@ -44,6 +44,36 @@ export class NotificationService {
             return false;
         }
     }
+
+    async sendSenderNotification(
+        formIssuerEmail: string,
+        envelopeId: string,
+        status: string
+    ): Promise<boolean> {
+        try {
+            const subject = `Envelope ${envelopeId} Status Update: ${status}`;
+            const text = `The envelope with ID ${envelopeId} has been updated to the status: ${status}.`;
+            const html = `
+                <h2>Envelope Status Update</h2>
+                <p>The envelope with ID <strong>${envelopeId}</strong> has been updated to the status: <strong>${status}</strong>.</p>
+            `;
+    
+            await this.transporter.sendMail({
+                from: process.env.EMAIL_FROM,
+                to: formIssuerEmail,
+                subject,
+                text,
+                html,
+            });
+    
+            console.log(`Notification sent to form issuer: ${formIssuerEmail}`);
+            return true;
+        } catch (error) {
+            console.error(`Error sending notification to form issuer (${formIssuerEmail}):`, error);
+            return false;
+        }
+    }
+    
     private createStatusEmail(statusHistory: IStatusHistory): EmailNotification {
         const subject = `Document Status Update: ${statusHistory.status}`;
         const text = `Your Document (Envelope IS: ${statusHistory.envelopeId}) is now ${statusHistory.status}`;
