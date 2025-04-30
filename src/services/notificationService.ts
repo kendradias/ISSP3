@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import {IStatusHistory, StatusHistory} from '../models/statusHistory';
+import {IStatusHistory, StatusHistory} from '../models/statusHistory.ts';
 
 export interface EmailNotification {
     to: string;

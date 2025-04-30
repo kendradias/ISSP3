@@ -9,6 +9,9 @@ import EnvelopeFormData from "../models/formData.ts";
 import { savePDF } from "../utils/pdfUtils.ts";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { NotificationService } from "./notificationService.ts";
+import { StatusHistory } from "../models/statusHistory.ts";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -120,7 +123,8 @@ export const processEnvelope = async (
         const accountId = process.env.ACCOUNT_ID!;
         const { formData, signerEmail } = await getFormData(accessToken, accountId, envelopeId);
         const pdfPath = await downloadEnvelopePDF(accessToken, accountId, envelopeId);
-        
+
+        // Save form data to the database
         await saveFormDataToDB({
             envelopeId,
             signerEmail: signerEmail || "",
@@ -129,6 +133,32 @@ export const processEnvelope = async (
             formData: new Map(Object.entries(formData)),
             completedAt: completedDateTime
         });
+
+        // Create or update the status history
+        const previousStatus = await StatusHistory.findOne({ envelopeId }).sort({ timestamp: -1 });
+        const newStatus = 'completed';
+
+        const statusHistory = new StatusHistory({
+            envelopeId,
+            signerEmail: signerEmail || "",
+            status: newStatus,
+            previousStatus: previousStatus?.status || null,
+            timestamp: new Date(completedDateTime),
+            notificationSent: false
+        });
+
+        await statusHistory.save();
+        console.log(`Status history record created for envelope ${envelopeId}`);
+
+        // Send a notification
+        const notificationService = new NotificationService();
+        const result = await notificationService.sendStatusNotification(statusHistory);
+
+        if (result) {
+            console.log(`Notification sent for envelope ${envelopeId}`);
+        } else {
+            console.error(`Failed to send notification for envelope ${envelopeId}`);
+        }
     } catch (error: unknown) {
         console.error(`Error processing envelope ${envelopeId}:`, error);
     }
