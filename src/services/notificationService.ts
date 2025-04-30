@@ -64,4 +64,48 @@ export class NotificationService {
 
         return { to: statusHistory.signerEmail, subject, text, html };
     }
+
+    async checkAndSendNotification(
+        envelopeId: string, 
+        signerEmail: string, 
+        status: string
+      ): Promise<boolean> {
+        try {
+          // Check if notification was already sent for this envelope
+          const existingNotification = await StatusHistory.findOne({
+            envelopeId,
+            notificationSent: true
+          });
+  
+          // If notification already exists, don't send again
+          if (existingNotification) {
+            console.log(`Notification already sent for envelope ${envelopeId}`);
+            return false;
+          }
+  
+          // Find or create status history
+          let statusHistory = await StatusHistory.findOne({ envelopeId });
+          
+          if (!statusHistory) {
+            // Create new status history record if none exists
+            statusHistory = new StatusHistory({
+              envelopeId,
+              signerEmail,
+              status,
+              previousStatus: null,
+              timestamp: new Date(),
+              notificationSent: false
+            });
+            await statusHistory.save();
+          }
+  
+          // Use existing method to send the notification
+          console.log(`Sending missing notification for envelope ${envelopeId}`);
+          return this.sendStatusNotification(statusHistory);
+          
+        } catch (error) {
+          console.error(`Error checking/sending notification for envelope ${envelopeId}:`, error);
+          return false;
+        }
+      }
 }
