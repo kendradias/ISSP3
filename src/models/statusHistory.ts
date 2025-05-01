@@ -4,7 +4,7 @@ export interface IStatusHistory extends Document {
     envelopeId: string;
     signerEmail: string;
     status: string;
-    previousstatus: string | null;
+    previousStatus: string | null;
     timestamp: Date;
     notificationSent: boolean;
     notificationTimestamp: Date | null;
@@ -15,7 +15,7 @@ const statusHistorySchema =  new mongoose.Schema({
     signerEmail: {type: String, required: true},
     status: {type: String, required: true},
     previousStatus: {type: String, default: null},
-    timestamp: {type: String, default: Date.now},
+    timestamp: {type: Date, default: Date.now},
     notificationSent: {type: Boolean, default: false},
     notificationTimestamp: {type: Date, default: null}
 });

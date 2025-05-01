@@ -9,6 +9,9 @@ import EnvelopeFormData from "../models/formData.ts";
 import { savePDF } from "../utils/pdfUtils.ts";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { NotificationService } from "./notificationService.ts";
+import { StatusHistory } from "../models/statusHistory.ts";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -120,7 +123,8 @@ export const processEnvelope = async (
         const accountId = process.env.ACCOUNT_ID!;
         const { formData, signerEmail } = await getFormData(accessToken, accountId, envelopeId);
         const pdfPath = await downloadEnvelopePDF(accessToken, accountId, envelopeId);
-        
+
+        // Save form data to the database
         await saveFormDataToDB({
             envelopeId,
             signerEmail: signerEmail || "",
@@ -129,8 +133,65 @@ export const processEnvelope = async (
             formData: new Map(Object.entries(formData)),
             completedAt: completedDateTime
         });
-    } catch (error: unknown) {
-        console.error(`Error processing envelope ${envelopeId}:`, error);
-    }
-}
 
+        // Check if a notification has already been sent (works for both signer and sender)
+        const existingStatus = await StatusHistory.findOne({ envelopeId, status: 'completed' });
+        if (existingStatus?.notificationSent) {
+            console.log(`Notification already sent for envelope ${envelopeId}. Skipping.`);
+            return;
+        }
+
+        // Create or update the status history
+        const previousStatus = await StatusHistory.findOne({ envelopeId }).sort({ timestamp: -1 });
+        const newStatus = 'completed';
+
+        const statusHistory = new StatusHistory({
+            envelopeId,
+            signerEmail: signerEmail || "",
+            status: newStatus,
+            previousStatus: previousStatus?.status || null,
+            timestamp: new Date(completedDateTime),
+            notificationSent: false
+        });
+
+        await statusHistory.save();
+        console.log(`Status history record created for envelope ${envelopeId}`);
+
+        // Initialize NotificationService
+        const notificationService = new NotificationService();
+
+        // Send a notification to the customer (signer)
+        if (signerEmail) {
+            const customerNotificationResult = await notificationService.sendStatusNotification(statusHistory);
+            if (customerNotificationResult) {
+                console.log(`Notification sent to customer (signer) for envelope ${envelopeId}`);
+            } else {
+                console.error(`Failed to send notification to customer (signer) for envelope ${envelopeId}`);
+            }
+        } else {
+            console.warn(`No signer email found for envelope ${envelopeId}. Skipping customer notification.`);
+        }
+
+        // Send a notification to the form issuer (sender)
+        const formIssuerEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
+        const senderNotificationResult = await notificationService.sendSenderNotification(
+            formIssuerEmail,
+            envelopeId,
+            newStatus
+        );
+
+        if (senderNotificationResult) {
+            console.log(`Notification sent to form issuer for envelope ${envelopeId}`);
+        } else {
+            console.error(`Failed to send notification to form issuer for envelope ${envelopeId}`);
+        }
+
+        // Mark the notification as sent
+        statusHistory.notificationSent = true;
+        await statusHistory.save();
+        console.log(`Notification status updated for envelope ${envelopeId}`);
+
+    } catch (error: unknown) {
+    console.error(`Error processing envelope ${envelopeId}:`, error);
+    }
+};

@@ -43,8 +43,7 @@ Edit the `.env` file with your actual credentials:
 - MongoDB connection details
 - DocuSign integration keys
 - API endpoints
-- SMTP Credentials 
--
+- SMTP Credentials (gmail address app and password)
 
 ### 4. MongoDB Connection
 
@@ -61,30 +60,21 @@ The project is configured to connect to MongoDB using the credentials provided i
 docusign-data-transfer/
 ├── src/
 │   ├── config/
-│   │   ├── database.js    # MongoDB connection logic
-│   │   └── docusign.js    # DocuSign configuration
-│   ├── app.js             # Express application setup
-│   └── server.js          # Application entry point
+│   │   ├── database.ts    # MongoDB connection logic
+│   │   └── docusign.ts    # DocuSign configuration
+│   ├── app.ts             # Express application setup
+│   └── server.ts          # Application entry point
 └── .env                   # Environment variables (not in git)
 ```
 
 ## Running the Application
 
-Start the server:
-
-```bash
-node src/server.js
-```
-
-For development with auto-restart:
-
-```bash
-npm install -g nodemon
-nodemon src/server.js
-```
+Start the server/application:
+npm start
 
 ## Testing
 To test the notification service and db connection:
 npx ts-node scripts/testNotification.ts 
+
 
 
