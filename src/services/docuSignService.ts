@@ -134,7 +134,7 @@ export const processEnvelope = async (
             completedAt: completedDateTime
         });
 
-        // Check if a notification has already been sent
+        // Check if a notification has already been sent (works for both signer and sender)
         const existingStatus = await StatusHistory.findOne({ envelopeId, status: 'completed' });
         if (existingStatus?.notificationSent) {
             console.log(`Notification already sent for envelope ${envelopeId}. Skipping.`);
@@ -185,7 +185,13 @@ export const processEnvelope = async (
         } else {
             console.error(`Failed to send notification to form issuer for envelope ${envelopeId}`);
         }
-        } catch (error: unknown) {
-        console.error(`Error processing envelope ${envelopeId}:`, error);
-        }
+
+        // Mark the notification as sent
+        statusHistory.notificationSent = true;
+        await statusHistory.save();
+        console.log(`Notification status updated for envelope ${envelopeId}`);
+
+    } catch (error: unknown) {
+    console.error(`Error processing envelope ${envelopeId}:`, error);
+    }
 };
