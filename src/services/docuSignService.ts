@@ -134,7 +134,12 @@ export const processEnvelope = async (
             completedAt: completedDateTime
         });
 
-        
+        // Check if a notification has already been sent
+        const existingStatus = await StatusHistory.findOne({ envelopeId, status: 'completed' });
+        if (existingStatus?.notificationSent) {
+            console.log(`Notification already sent for envelope ${envelopeId}. Skipping.`);
+            return;
+        }
 
         // Create or update the status history
         const previousStatus = await StatusHistory.findOne({ envelopeId }).sort({ timestamp: -1 });
