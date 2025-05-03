@@ -160,18 +160,6 @@ export const processEnvelope = async (
         // Initialize NotificationService
         const notificationService = new NotificationService();
 
-        // Send a notification to the customer (signer)
-        if (signerEmail) {
-            const customerNotificationResult = await notificationService.sendStatusNotification(statusHistory);
-            if (customerNotificationResult) {
-                console.log(`Notification sent to customer (signer) for envelope ${envelopeId}`);
-            } else {
-                console.error(`Failed to send notification to customer (signer) for envelope ${envelopeId}`);
-            }
-        } else {
-            console.warn(`No signer email found for envelope ${envelopeId}. Skipping customer notification.`);
-        }
-
         // Send a notification to the form issuer (sender)
         const formIssuerEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
         const senderNotificationResult = await notificationService.sendSenderNotification(
