@@ -162,7 +162,7 @@ export const processEnvelope = async (
 
         // Send a notification to the support team (sender)
         const supportEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
-        const senderNotificationResult = await notificationService.sendSenderNotification(
+        const senderNotificationResult = await notificationService.sendSupportNotification(
             supportEmail,
             envelopeId,
             newStatus

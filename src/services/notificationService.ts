@@ -45,7 +45,7 @@ export class NotificationService {
         }
     }
 
-    async sendSenderNotification(
+    async sendSupportNotification(
         formIssuerEmail: string,
         envelopeId: string,
         status: string
