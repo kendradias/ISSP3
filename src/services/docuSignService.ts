@@ -134,7 +134,7 @@ export const processEnvelope = async (
             completedAt: completedDateTime
         });
 
-        // Check if a notification has already been sent (works for both signer and sender)
+        // Check if a notification has already been sent
         const existingStatus = await StatusHistory.findOne({ envelopeId, status: 'completed' });
         if (existingStatus?.notificationSent) {
             console.log(`Notification already sent for envelope ${envelopeId}. Skipping.`);
@@ -160,7 +160,7 @@ export const processEnvelope = async (
         // Initialize NotificationService
         const notificationService = new NotificationService();
 
-        // Send a notification to the form issuer (sender)
+        // Send a notification to the support team (sender)
         const supportEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
         const senderNotificationResult = await notificationService.sendSenderNotification(
             supportEmail,
