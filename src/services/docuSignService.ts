@@ -161,17 +161,17 @@ export const processEnvelope = async (
         const notificationService = new NotificationService();
 
         // Send a notification to the form issuer (sender)
-        const formIssuerEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
+        const supportEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
         const senderNotificationResult = await notificationService.sendSenderNotification(
-            formIssuerEmail,
+            supportEmail,
             envelopeId,
             newStatus
         );
 
         if (senderNotificationResult) {
-            console.log(`Notification sent to form issuer for envelope ${envelopeId}`);
+            console.log(`Notification sent to support team for envelope ${envelopeId}`);
         } else {
-            console.error(`Failed to send notification to form issuer for envelope ${envelopeId}`);
+            console.error(`Failed to send notification to support team for envelope ${envelopeId}`);
         }
 
         // Mark the notification as sent
