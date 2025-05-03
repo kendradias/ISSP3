@@ -1,4 +1,3 @@
-// tests/api.test.js
 require('dotenv').config();
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
@@ -8,6 +7,7 @@ const path = require('path');
 describe('DocuSign API Tests', () => {
   let accessToken;
   let accountId;
+  let mostRecentEnvelopeId;
   
   // Test authentication and token retrieval
   test('Should authenticate with DocuSign and get an access token', async () => {
@@ -126,7 +126,7 @@ describe('DocuSign API Tests', () => {
     }
   }, 10000);
   
-  // Test if the /instances endpoint exists (per your sponsor's question)
+  // Test if the /instances endpoint exists (exploratory)
   test('Should check if /instances endpoint exists', async () => {
     // Skip if authentication failed
     if (!accessToken) {
@@ -198,6 +198,7 @@ describe('DocuSign API Tests', () => {
       // If we have envelopes, test form_data endpoint
       if (response.data.envelopes && response.data.envelopes.length > 0) {
         const testEnvelope = response.data.envelopes[0];
+        mostRecentEnvelopeId = testEnvelope.envelopeId;
         console.log(`Testing endpoints with envelope: ${testEnvelope.envelopeId}`);
         
         // Test form_data endpoint
@@ -242,8 +243,8 @@ describe('DocuSign API Tests', () => {
     }
   }, 15000);
 
-
-  test('Should verify specific form_data endpoint with hardcoded ID', async () => {
+  // Test with a specific example envelope
+  test('Should verify form_data endpoint with example envelope', async () => {
     // Skip if authentication failed
     if (!accessToken) {
       console.log('Skipping specific form_data test due to missing access token');
@@ -251,10 +252,9 @@ describe('DocuSign API Tests', () => {
     }
     
     try {
-      // Using the specific envelope ID from your question
-      const specificEnvelopeId = '7f957bdd-1293-440c-8679-f4101a630385';
-      // Using the specific account ID from your question - can also be replaced with accountId variable
-      const specificAccountId = '470d6ee5-32c0-4eda-9f34-249fb8e85ec6';
+      // Using environment variables with fallback to example values
+      const specificEnvelopeId = process.env.TEST_ENVELOPE_ID || '7f957bdd-1293-440c-8679-f4101a630385';
+      const specificAccountId = process.env.TEST_ACCOUNT_ID || accountId;
       
       const formDataUrl = `${process.env.DOCUSIGN_BASE_URI}/v2.1/accounts/${specificAccountId}/envelopes/${specificEnvelopeId}/form_data`;
       console.log(`Testing specific form_data endpoint: ${formDataUrl}`);
@@ -274,7 +274,7 @@ describe('DocuSign API Tests', () => {
       
       // Add assertions based on expected data structure
       expect(formDataResponse.data).toBeDefined();
-      // Check if formData property exists (might need adjustment based on actual response)
+      // Check if formData property exists
       if (formDataResponse.data.formData) {
         console.log(`Form contains ${formDataResponse.data.formData.length} fields`);
         // Optionally log some field names
@@ -297,6 +297,46 @@ describe('DocuSign API Tests', () => {
         console.error('No response received');
       } else {
         console.error('Error setting up request:', error.message);
+      }
+      throw error;
+    }
+  }, 10000);
+
+  // Test with the most recent envelope found
+  test('Should verify form_data endpoint with most recent envelope', async () => {
+    // Skip if authentication failed or no envelopes found
+    if (!accessToken || !mostRecentEnvelopeId) {
+      console.log('Skipping dynamic form_data test due to missing access token or no recent envelopes');
+      return;
+    }
+    
+    try {
+      const formDataUrl = `${process.env.DOCUSIGN_BASE_URI}/v2.1/accounts/${accountId}/envelopes/${mostRecentEnvelopeId}/form_data`;
+      console.log(`Testing form_data with most recent envelope (${mostRecentEnvelopeId}): ${formDataUrl}`);
+      
+      const formDataResponse = await axios.get(formDataUrl, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Most recent envelope form data status:', formDataResponse.status);
+      expect(formDataResponse.status).toBe(200);
+      
+      // Add assertions based on expected data structure
+      expect(formDataResponse.data).toBeDefined();
+      
+      // Check if formData property exists
+      if (formDataResponse.data.formData) {
+        console.log(`Most recent form contains ${formDataResponse.data.formData.length} fields`);
+      }
+      
+    } catch (error) {
+      console.error('Dynamic Form Data Test Error:', error.message);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', JSON.stringify(error.response.data, null, 2));
       }
       throw error;
     }
