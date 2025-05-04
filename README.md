@@ -78,3 +78,65 @@ npx ts-node scripts/testNotification.ts
 
 
 
+
+# DocuSign Integarion
+ ## Create APP
+    -added new app under Apps & Keys 
+    -saved `Integration key (Client ID)`
+            `added Redirect URL (http://localhost:3000/callback)`
+            `added RSA Key Pair (saved private locally locally in .env)`
+            `API Account ID`
+            `User ID`
+
+## Set Up DocuSign Connect (Webhook)
+    - In DocuSign Admin Dashboard --> Integration ---> Connnect - Added Configuration
+         - URL- setup webhook endpoint "/webhook/docusign-webhook"
+         - Checked Event Type -- Envelope Signed/Completed
+         - Format: JSON
+         - Inculde Documents
+   - Used `Ngrok` to expose local server for webhook event testing  ("ngrok http 3000")
+
+## ADD Environmental Variables (.env)
+   PORT=3000
+   MONGO_URI=mongoDb_connection_string
+   PRIVATE_KEY_PATH = private_key_path
+
+   INTEGRATION_KEY=your_client_id
+   TOKEN_URL = 'https://account-d.docusign.com/oauth/token'
+   DOCUSIGN_API_BASE = 'https://demo.docusign.net/restapi'
+   DOCUSIGN_USER_ID=your_user_id
+   REDIRECT_URI = 'http://localhost:3000/callback'
+   ACCOUNT_ID=your_account_id
+
+
+
+## Grant Consent for JWT Authentication (One-time Only)
+ - visit the following link once in browser, it performs one-time authorization step required by docuSign to use JWT authentication flow, 
+    `https://account-d.docusign.com/oauth/auth?
+        response_type=code&
+        scope=impersonation%20signature&
+        client_id=INTEGRATION_KEY&
+        redirect_uri=REDIRECT_URL`
+
+
+## API endpoints used
+   - DocuSign Webhook (Connect Event)
+      POST `/webhook/docusign-webhook`
+
+   - Get Completed Envelope from Date(Cron Job)
+       GET `https://demo.docusign.net/restapi/v2.1/accounts/{accountId}/envelopes?from_date={ISO_8601}&status=completed`
+`
+
+   - GET Envelope Form Data
+        GET `https://demo.docusign.net/restapi/v2.1/accounts/{accountId}/envelopes/{envelopeId}/form_data`
+
+   - GET Download combined Document (PDF)
+        GET `https://demo.docusign.net/restapi/v2.1/accounts/{accountId}/envelopes/{envelopeId}/documents/combined`
+
+
+   
+    
+
+
+
+
