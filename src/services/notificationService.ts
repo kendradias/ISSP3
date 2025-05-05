@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
 import {IStatusHistory, StatusHistory} from '../models/statusHistory.ts';
+import { Request } from 'express';
+
 
 export interface EmailNotification {
     to: string;
@@ -45,7 +47,7 @@ export class NotificationService {
         }
     }
 
-    async sendSenderNotification(
+    async sendSupportNotification(
         formIssuerEmail: string,
         envelopeId: string,
         status: string
@@ -73,6 +75,97 @@ export class NotificationService {
             return false;
         }
     }
+
+    async sendErrorNotification(err: unknown, req?: Request, envelopeId?: string): Promise<boolean> {
+        try {
+          const techSupportEmail = process.env.TECH_SUPPORT_EMAIL;
+          if (!techSupportEmail) {
+            console.error('Tech support email is not configured in the environment variables.');
+            return false;
+          }
+      
+          const subject = `[Error Notification] Application Error in ${process.env.NODE_ENV || 'development'}`;
+          const timestamp = new Date().toISOString();
+      
+          const requestDetails = req
+            ? `
+            **Request Details**:
+            - HTTP Method: ${req.method}
+            - URL: ${req.originalUrl}
+            - Query Parameters: ${JSON.stringify(req.query)}
+            - Request Body: ${JSON.stringify(req.body)}
+            - Headers: ${JSON.stringify(req.headers, null, 2)}
+            `
+            : '';
+      
+          const envelopeDetails = envelopeId
+            ? `
+            **Envelope Details**:
+            - Envelope ID: ${envelopeId}
+            `
+            : '';
+      
+          const text = `
+      An error occurred in the application:
+      
+      **Error Message**:
+      ${err instanceof Error ? err.message : JSON.stringify(err)}
+      
+      **Stack Trace**:
+      ${err instanceof Error ? err.stack : 'No stack trace available'}
+      
+      ${envelopeDetails}
+      
+      ${requestDetails}
+      
+      **Environment**:
+      - NODE_ENV: ${process.env.NODE_ENV || 'development'}
+      
+      **Timestamp**:
+      ${timestamp}
+          `;
+      
+          const html = `
+            <h2>An error occurred in the application</h2>
+            <p><strong>Error Message:</strong> ${err instanceof Error ? err.message : JSON.stringify(err)}</p>
+            <pre><strong>Stack Trace:</strong><br>${err instanceof Error ? err.stack : 'No stack trace available'}</pre>
+            ${envelopeDetails ? `
+            <h3>Envelope Details:</h3>
+            <ul>
+              <li><strong>Envelope ID:</strong> ${envelopeId}</li>
+            </ul>
+            ` : ''}
+            ${req ? `
+            <h3>Request Details:</h3>
+            <ul>
+              <li><strong>HTTP Method:</strong> ${req.method}</li>
+              <li><strong>URL:</strong> ${req.originalUrl}</li>
+              <li><strong>Query Parameters:</strong> ${JSON.stringify(req.query)}</li>
+              <li><strong>Request Body:</strong> ${JSON.stringify(req.body)}</li>
+              <li><strong>Headers:</strong> <pre>${JSON.stringify(req.headers, null, 2)}</pre></li>
+            </ul>
+            ` : ''}
+            <h3>Environment:</h3>
+            <p><strong>NODE_ENV:</strong> ${process.env.NODE_ENV || 'development'}</p>
+            <h3>Timestamp:</h3>
+            <p>${timestamp}</p>
+          `;
+      
+          await this.transporter.sendMail({
+            from: process.env.EMAIL_FROM,
+            to: techSupportEmail,
+            subject,
+            text,
+            html,
+          });
+      
+          console.log(`Error notification sent to tech support: ${techSupportEmail}`);
+          return true;
+        } catch (error) {
+          console.error('Error sending error notification:', error);
+          return false;
+        }
+    }
     
     private createStatusEmail(statusHistory: IStatusHistory): EmailNotification {
         const subject = `Document Status Update: ${statusHistory.status}`;
@@ -89,48 +182,4 @@ export class NotificationService {
 
         return { to: statusHistory.signerEmail, subject, text, html };
     }
-
-    async checkAndSendNotification(
-        envelopeId: string, 
-        signerEmail: string, 
-        status: string
-      ): Promise<boolean> {
-        try {
-          // Check if notification was already sent for this envelope
-          const existingNotification = await StatusHistory.findOne({
-            envelopeId,
-            notificationSent: true
-          });
-  
-          // If notification already exists, don't send again
-          if (existingNotification) {
-            console.log(`Notification already sent for envelope ${envelopeId}`);
-            return false;
-          }
-  
-          // Find or create status history
-          let statusHistory = await StatusHistory.findOne({ envelopeId });
-          
-          if (!statusHistory) {
-            // Create new status history record if none exists
-            statusHistory = new StatusHistory({
-              envelopeId,
-              signerEmail,
-              status,
-              previousStatus: null,
-              timestamp: new Date(),
-              notificationSent: false
-            });
-            await statusHistory.save();
-          }
-  
-          // Use existing method to send the notification
-          console.log(`Sending missing notification for envelope ${envelopeId}`);
-          return this.sendStatusNotification(statusHistory);
-          
-        } catch (error) {
-          console.error(`Error checking/sending notification for envelope ${envelopeId}:`, error);
-          return false;
-        }
-      }
 }
