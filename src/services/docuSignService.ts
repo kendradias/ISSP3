@@ -134,7 +134,7 @@ export const processEnvelope = async (
             completedAt: completedDateTime
         });
 
-        // Check if a notification has already been sent (works for both signer and sender)
+        // Check if a notification has already been sent
         const existingStatus = await StatusHistory.findOne({ envelopeId, status: 'completed' });
         if (existingStatus?.notificationSent) {
             console.log(`Notification already sent for envelope ${envelopeId}. Skipping.`);
@@ -160,30 +160,18 @@ export const processEnvelope = async (
         // Initialize NotificationService
         const notificationService = new NotificationService();
 
-        // Send a notification to the customer (signer)
-        if (signerEmail) {
-            const customerNotificationResult = await notificationService.sendStatusNotification(statusHistory);
-            if (customerNotificationResult) {
-                console.log(`Notification sent to customer (signer) for envelope ${envelopeId}`);
-            } else {
-                console.error(`Failed to send notification to customer (signer) for envelope ${envelopeId}`);
-            }
-        } else {
-            console.warn(`No signer email found for envelope ${envelopeId}. Skipping customer notification.`);
-        }
-
-        // Send a notification to the form issuer (sender)
-        const formIssuerEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
-        const senderNotificationResult = await notificationService.sendSenderNotification(
-            formIssuerEmail,
+        // Send a notification to the support team (sender)
+        const supportEmail = process.env.FORM_ISSUER_EMAIL || "bcitissp3@outlook.com";
+        const senderNotificationResult = await notificationService.sendSupportNotification(
+            supportEmail,
             envelopeId,
             newStatus
         );
 
         if (senderNotificationResult) {
-            console.log(`Notification sent to form issuer for envelope ${envelopeId}`);
+            console.log(`Notification sent to support team for envelope ${envelopeId}`);
         } else {
-            console.error(`Failed to send notification to form issuer for envelope ${envelopeId}`);
+            console.error(`Failed to send notification to support team for envelope ${envelopeId}`);
         }
 
         // Mark the notification as sent
