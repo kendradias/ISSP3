@@ -40,6 +40,11 @@ app.get('/api/health', async (req: Request, res: Response) => {
 app.get('/test-error', (req, res) => {
   throw new Error('Test error for handleError');
 });
+// Test Route to simiulate envelope errors
+app.get('/test-envelope-error', (req, res) => {
+  req.body = { envelopeId: '12345' }; // Simulate an envelope ID in the request body
+  throw new Error('Test error for envelope processing');
+});
 
 // Use webhook routes
 app.use("/webhook", router);

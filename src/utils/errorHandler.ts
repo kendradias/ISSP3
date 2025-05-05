@@ -12,13 +12,16 @@ export const handleError = async(
 ): Promise<void> => {
   console.error('Error occured: ', err);
 
-  // TODO: send notification email to Quality tech support email address
+  // Extract envelope-related details if available
+  const envelopeId = req.body?.envelopeId || req.query?.envelopeId || 'Unknown Envelope ID';
+
+  // Send notification email to tech support
   try {
-    await notificationService.sendErrorNotification(err);
+    await notificationService.sendErrorNotification(err, req, envelopeId);
     console.log('Error notification sent to tech support.');
-    } catch (notificationError) {
-        console.error('Failed to send error notification:', notificationError);
-    }
+  } catch (notificationError) {
+    console.error('Failed to send error notification:', notificationError);
+  }
 
     // Respond with a generic error message
     res.status(500).json({
