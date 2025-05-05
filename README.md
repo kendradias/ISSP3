@@ -43,7 +43,7 @@ Edit the `.env` file with your actual credentials:
 - MongoDB connection details
 - DocuSign integration keys
 - API endpoints
-- SMTP Credentials (gmail address app and password)
+- SMTP Credentials (gmail address app and password, you must generate your own and add them to the USER and PASSWORD feilds - see env.example file)
 
 ### 4. MongoDB Connection
 
@@ -62,8 +62,7 @@ docusign-data-transfer/
 │   ├── config/
 │   │   ├── database.ts    # MongoDB connection logic
 │   │   └── docusign.ts    # DocuSign configuration
-│   ├── app.ts             # Express application setup
-│   └── server.ts          # Application entry point
+│   ├── app.ts             # # Application entry point
 └── .env                   # Environment variables (not in git)
 ```
 
