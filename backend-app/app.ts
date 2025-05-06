@@ -6,7 +6,8 @@ import { NotificationService } from './src/services/notificationService.ts';
 import connectDB from './src/config/database.ts';
 import router from './src/routes/webhookRoutes.ts';
 import { handleError } from './src/utils/errorHandler.ts';
-
+import applicationRouter from './src/routes/applicationsRoutes.ts';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ const PORT = process.env.PORT || 3000;
 const notificationService = new NotificationService();
 
 // Middleware
+app.use(cors());
 app.use(bodyParser.json({limit:'50mb'}));
 app.use(express.urlencoded({extended:true}));
 
@@ -48,6 +50,8 @@ app.get('/test-envelope-error', (req, res) => {
 
 // Use webhook routes
 app.use("/webhook", router);
+
+app.use("/api", applicationRouter)
 // Register the error-handling middleware
 app.use(handleError);
 
