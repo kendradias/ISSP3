@@ -194,7 +194,33 @@ npm start
 
    
     
+# Testing API
 
+To test the DocuSign API integration, we've created a test file in the test folder named api.test.js. This file tests various DocuSign API endpoints needed for our integration.
 
+# Install Testing Dependencies
 
+```bash
+npm install --save-dev jest
+npm install dotenv axios jsonwebtoken
+```
+
+# Update package.json
+
+ "scripts": {
+    "test": "jest",
+    "test:api": "jest tests/api.test.js",
+    "start": "node --loader ts-node/esm app.ts"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000
+  },
+
+# Run the API Test
+
+```bash
+npm run test:api
+
+```
 
