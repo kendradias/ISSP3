@@ -121,18 +121,35 @@ export const processEnvelope = async (
 ): Promise<void> => {
     try {
         const accountId = process.env.ACCOUNT_ID!;
+
+        // Check if the envelope already exists in the EnvelopeFormData collection
+        const existingEnvelope = await EnvelopeFormData.findOne({ envelopeId });
+        if (existingEnvelope) {
+            console.log(`Envelope ${envelopeId} already exists in EnvelopeFormData. Skipping.`);
+            return; // Skip processing if the envelope already exists
+        }
+
         const { formData, signerEmail } = await getFormData(accessToken, accountId, envelopeId);
         const pdfPath = await downloadEnvelopePDF(accessToken, accountId, envelopeId);
 
         // Save form data to the database
-        await saveFormDataToDB({
-            envelopeId,
-            signerEmail: signerEmail || "",
-            status: 'completed',
-            pdfPath,
-            formData: new Map(Object.entries(formData)),
-            completedAt: completedDateTime
-        });
+        try {
+            await saveFormDataToDB({
+                envelopeId,
+                signerEmail: signerEmail || "",
+                status: 'completed',
+                pdfPath,
+                formData: new Map(Object.entries(formData)),
+                completedAt: completedDateTime
+            });
+        } catch (error: any) {
+            if (error.code === 11000) {
+                console.log(`Duplicate record detected for envelope ${envelopeId}. Skipping save.`);
+                return; // Skip further processing if the record already exists
+            } else {
+                throw error; // Re-throw other errors
+            }
+        }
 
         // Check if a notification has already been sent
         const existingStatus = await StatusHistory.findOne({ envelopeId, status: 'completed' });
@@ -180,6 +197,6 @@ export const processEnvelope = async (
         console.log(`Notification status updated for envelope ${envelopeId}`);
 
     } catch (error: unknown) {
-    console.error(`Error processing envelope ${envelopeId}:`, error);
+        console.error(`Error processing envelope ${envelopeId}:`, error);
     }
 };
