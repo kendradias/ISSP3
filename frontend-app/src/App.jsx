@@ -8,9 +8,9 @@ import Footer from './components/Footer';
 function App() {
   return (
     <Router>
-      <div style={styles.appContainer}>
+      <div className='appContainer'>
         <Header />
-        <div style={styles.content}>
+        <div className='content'>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/applications" element={<Application />} />
@@ -22,17 +22,5 @@ function App() {
   );
 }
 
-const styles = {
-  appContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-  },
-  content: {
-    flex: 1,
-    padding: '20px',
-    paddingBottom: '80px', 
-  },
-};
 
 export default App;
