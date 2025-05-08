@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Node.js backend application
+  backend:
+    build:
+      context: ./backend-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/docusign
+      - CLIENT_ID=${CLIENT_ID}
+      - DOCUSIGN_USER_ID=${DOCUSIGN_USER_ID}
+      - ACCOUNT_ID=${ACCOUNT_ID}
+      - PRIVATE_KEY_PATH=/usr/src/app/Keys/private.key
+      - TOKEN_URL=https://account-d.docusign.com/oauth/token
+      - DOCUSIGN_API_BASE=https://demo.docusign.net/restapi
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+    volumes:
+      - ./backend-app/Keys:/usr/src/app/Keys
+      - ./backend-app/pdfs:/usr/src/app/pdfs
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  # MongoDB database
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    
+  # React frontend application
+  frontend:
+    build:
+      context: ./frontend-app
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:

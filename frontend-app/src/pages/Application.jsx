@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const VITE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3000/api/applications';
+
+
 const Application = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +14,7 @@ const Application = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/applications');
+        const response = await axios.get(`${VITE_URL}`);
         setApplications(response.data);
       } catch (err) {
         setError("Failed to load applications.");
