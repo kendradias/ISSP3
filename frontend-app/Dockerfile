@@ -12,6 +12,9 @@ RUN npm install
 # Copy all files
 COPY . .
 
+# Set the API URL for production build
+ENV VITE_API_URL=http://backend:3000/api/applications
+
 # Build the app (for Vite projects)
 RUN npm run build
 
