@@ -63,22 +63,27 @@ export const downloadEnvelopePDF = async (
     accountId: string,
     envelopeId: string,
 ): Promise<string> => {
-    const pdfUrl = `${process.env.DOCUSIGN_API_BASE}/v2.1/accounts/${accountId}/envelopes/${envelopeId}/documents/combined`;
-    const response = await axios.get(pdfUrl, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        responseType: 'stream',
-    });
+    try {
+        const pdfUrl = `${process.env.DOCUSIGN_API_BASE}/v2.1/accounts/${accountId}/envelopes/${envelopeId}/documents/combined`;
+        const response = await axios.get(pdfUrl, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            responseType: 'stream',
+        });
 
-    const pdfDir = path.join(__dirname, '../pdfs');
-    const pdfPath = path.join(pdfDir, `${envelopeId}.pdf`);
+        const pdfDir = path.join(__dirname, '../pdfs');
+        const pdfPath = path.join(pdfDir, `${envelopeId}.pdf`);
 
-    // Ensure the directory exists
-    if (!fs.existsSync(pdfDir)) {
-        fs.mkdirSync(pdfDir, { recursive: true });
+        // Ensure the directory exists
+        if (!fs.existsSync(pdfDir)) {
+            fs.mkdirSync(pdfDir, { recursive: true });
+        }
+
+        await savePDF(response.data, pdfPath);
+        return pdfPath;
+    } catch (error: unknown) {
+        console.error("Error downloading PDF:", error);
+        throw error;
     }
-
-    await savePDF(response.data, pdfPath);
-    return pdfPath;
 };
 
 export const recoverMissedEnvelopes = async (): Promise<void> => {

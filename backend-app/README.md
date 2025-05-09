@@ -16,13 +16,13 @@ This project automates data transfer from DocuSign web forms to a MongoDB databa
 
 ```bash
 git clone https://github.com/kendradias/ISSP3.git
-cd docusign-data-transfer
+cd ISSP3
 ```
 
 ### 2. Install Dependencies
 
 ```bash
-npm install mongoose express dotenv
+npm install mongoose express dotenv axios jsonwebtoken node-cron cors
 npm install --save-dev @types/node @types/express @types/mongoose @types/nodemailer
 ```
 
@@ -31,7 +31,7 @@ Core dependencies:
 - **express**: Web framework for Node.js
 - **dotenv**: Loads environment variables from `.env` files
 
-### 3. Configure Environment Variables
+### 3. Configure Environment Variables and Private/Public keys
 
 Copy the example environment file:
 
@@ -44,6 +44,14 @@ Edit the `.env` file with your actual credentials:
 - DocuSign integration keys
 - API endpoints
 - SMTP Credentials (Gmail address and app password; you must generate your own and add them to the `SMTP_USER` and `SMTP_PASS` fields - see `.env.example` file)
+
+Copy the example Keys folder
+
+```bash
+cp -r Keys.example Keys
+```
+
+Add the public and private keys to the respective file.
 
 ### 4. MongoDB Connection
 
@@ -85,6 +93,19 @@ visit /test-error and/or /test-envelope-error routes in your browser to test err
 ex. `http://localhost:3000/test-envelope-error` || `http://localhost:3000/test-error`
 
 This script will simulate an error and send a test email to the tech support email address. Check the inbox of the `TECH_SUPPORT_EMAIL` to verify that the email was received.
+
+In addition to the above, the script file testErrors.js can be run to demonstrate error handling within
+the app. The following test cases are performed:
+1. envelopeId, status, completedDateTime fields are not present
+2. envelopeId, status, completedDateTime fields are empty
+3. envelopeId, status, completedDateTime fields are not strings
+
+Note that the above tests will only run successfully if the following code is present in notificationService, but should not be present in production.
+```
+   tls: {
+         rejectUnauthorized: false, // Allow self-signed certificates
+   },
+```
 
 ### 3. Expected Output
 

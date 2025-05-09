@@ -10,17 +10,22 @@ interface SaveFormDataParams {
 }
 
 export const saveFormDataToDB = async ({envelopeId, signerEmail, pdfPath, status, formData, completedAt }:SaveFormDataParams): Promise<void> => {
-  const newRecord = new EnvelopeFormData({
-    envelopeId,
-    signerEmail,
-    pdfPath,
-    status,
-    formData,
-    completedAt
-  });
+  try {
+    const newRecord = new EnvelopeFormData({
+      envelopeId,
+      signerEmail,
+      pdfPath,
+      status,
+      formData,
+      completedAt
+    });
 
-  await newRecord.save();
-  console.log('Data saved to MongoDB');
+    await newRecord.save();
+    console.log('Data saved to MongoDB');
+  } catch (error) {
+    console.error('Error saving data to MongoDB:', error);
+    throw error;
+  }
 };
 
 // Function to fetch the latest 'envelopeCompletedDateTime'
