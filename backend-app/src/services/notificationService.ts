@@ -21,7 +21,11 @@ export class NotificationService {
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
-            }
+            // }
+            },
+            tls: {
+                rejectUnauthorized: false, // Allow self-signed certificates
+            },
         })
     }
     async sendStatusNotification(statusHistory: IStatusHistory): Promise<boolean> {
@@ -42,8 +46,8 @@ export class NotificationService {
 
             return true;
         } catch(error) {    
-            console.error("Error sending notification: ", error)
-            return false;
+            console.error("Error sending notification: ", error);
+            throw error; // Rethrow the error to be handled by the caller
         }
     }
 
@@ -72,7 +76,7 @@ export class NotificationService {
             return true;
         } catch (error) {
             console.error(`Error sending notification to form issuer (${formIssuerEmail}):`, error);
-            return false;
+            throw error; // Rethrow the error to be handled by the caller
         }
     }
 
@@ -159,7 +163,6 @@ export class NotificationService {
             html,
           });
       
-          console.log(`Error notification sent to tech support: ${techSupportEmail}`);
           return true;
         } catch (error) {
           console.error('Error sending error notification:', error);
