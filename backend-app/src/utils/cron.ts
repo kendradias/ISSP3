@@ -4,7 +4,8 @@ import { recoverMissedEnvelopes } from '../services/docuSignService.ts';
 let isRunning = false;
 
 export function startCronJobs(): void {
-  cron.schedule('*/1 * * * *', async () => {
+  //runs in every minute
+  cron.schedule('*/1 * * * *', async () => {  
     if (isRunning) {
       console.log('Previous recovery job still running, skipping this round.');
       return;

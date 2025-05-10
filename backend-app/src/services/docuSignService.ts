@@ -105,6 +105,14 @@ export const recoverMissedEnvelopes = async (): Promise<void> => {
         let processedCount = 0;
 
         for (const envelope of envelopes) {
+
+            // Skip envelopes that aren't from the Quality One form
+            if (!envelope.emailSubject || !envelope.emailSubject.includes("Quality Horticulture Account Application")) {
+                console.log(`Skipped envelope ${envelope.envelopeId} due to unmatched subject: "${envelope.emailSubject}"`);
+                continue;
+            }
+
+
             const exists = await EnvelopeFormData.findOne({ envelopeId: envelope.envelopeId });
             if (exists && exists.formData && exists.pdfPath) continue; // Already saved
 
@@ -129,7 +137,7 @@ export const processEnvelope = async (
 
         // Check if the envelope already exists in the EnvelopeFormData collection
         const existingEnvelope = await EnvelopeFormData.findOne({ envelopeId });
-        if (existingEnvelope) {
+        if (existingEnvelope?.formData && existingEnvelope?.pdfPath) {
             console.log(`Envelope ${envelopeId} already exists in EnvelopeFormData. Skipping.`);
             return; // Skip processing if the envelope already exists
         }
