@@ -1,59 +1,67 @@
-docusign-data-transfer/
-│
+# Backend Project Folder Structure
+
+├── .dockerignore
 ├── .env
 ├── .env.example
-├── .dockerignore
-├── .gitignore
-├── CONTRIBUTING.md
 ├── Dockerfile
-├── docker-compose.yml
-├── README.md
+├── folder-diagram.txt
+├── package-lock.json
 ├── package.json
-│
-├── src/
-│   ├── app.js
-│   ├── server.js
-│   │
-│   ├── config/
-│   │   ├── api.js
-│   │   ├── database.js
-│   │   └── docusign.js
-│   │
-│   ├── controllers/
-│   │   ├── dataController.js
-│   │   └── webhookController.js
-│   │
-│   ├── docusign/
-│   │   ├── envelopeParser.js
-│   │   └── webhookHandler.js
-│   │
-│   ├── middleware/
-│   │   ├── authentication.js
-│   │   └── validation.js
-│   │
-│   ├── models/
-│   │   └── formData.js
-│   │
-│   ├── routes/
-│   │   ├── dataRoutes.js
-│   │   └── webhookRoutes.js
-│   │
-│   ├── services/
-│   │   ├── apiService.js
-│   │   ├── databaseService.js
-│   │   └── docusignService.js
-│   │
-│   └── utils/
-│       ├── errorHandler.js
-│       └── logger.js
-│
-├── data/
-│   └── samples/
-│       └── sampleEnvelope.json
-│
+├── README.md
+└── tsconfig.json
 ├── logs/
 │
-└── tests/
-    ├── api.test.js
-    ├── database.test.js
-    └── docusign.test.js
+├── node_modules/
+│
+├── .gitignore
+├── docker-compose.yml
+├── .ps1
+│
+└── backend/
+    ├── data/
+    │
+    ├── Keys/
+    │   ├── private.key
+    │   └── public.key
+    │
+    ├── node_modules/
+    │
+    ├── scripts/
+    │   ├── insertFormDataTest.js
+    │   ├── testErrors.js
+    │   └── testNotification.ts
+    │
+    └── src/
+        ├── config/
+        │   └── database.ts
+        │
+        ├── controllers/
+        │   ├── applicationController.ts
+        │   └── webhookController.ts
+        │
+        ├── models/
+        │   ├── formData.ts
+        │   └── statusHistory.ts
+        │
+        ├── pdfs/
+        │
+        ├── routes/
+        │   ├── applicationsRoutes.ts
+        │   └── webhookRoutes.ts
+        │
+        ├── services/
+        │   ├── databaseService.ts
+        │   ├── docuSignService.ts
+        │   ├── docusignTokenService.ts
+        │   └── notificationService.ts
+        │
+        ├── types/
+        │   └── docusignWebhook.ts
+        │
+        └── utils/
+        │   ├── cron.ts
+        │   ├── errorHandler.ts
+        │   └── pdfUtils.ts
+        │
+        └── tests/
+            └── api.test.js

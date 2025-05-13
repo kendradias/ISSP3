@@ -128,19 +128,7 @@ Note that the above tests will only run successfully if the following code is pr
 ## Project Structure
 
 ```
-docusign-data-transfer/
-├── src/
-│   ├── config/
-│   │   ├── database.ts    # MongoDB connection logic
-│   │   └── docusign.ts    # DocuSign configuration
-│   ├── app.ts             # Application entry point
-│   ├── services/
-│   │   └── notificationService.ts # Notification service logic
-│   ├── utils/
-│   │   └── errorHandler.ts # Global error handling middleware
-├── scripts/
-│   └── testNotification.ts # Script to test the notification service
-└── .env                   # Environment variables (not in git)
+refer to 'folder-diagram.txt' file in backend-app root directory
 ```
 
 ---
@@ -151,6 +139,13 @@ Start the server/application:
 
 ```bash
 npm start
+```
+
+Start the front-end: 
+```bash
+npm i
+npm i axios
+npm run dev
 ```
 
 
