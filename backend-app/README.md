@@ -66,7 +66,7 @@ The project is configured to connect to MongoDB using the credentials provided i
 
 ## Testing the Notification Service
 
-The notification service is responsible for sending error notifications to the tech support email address configured in your `.env` file. Follow these steps to test the setup:
+The notification service is responsible for sending error notifications to the tech support email address, and envelope status updates to the customer support team email configured in your `.env` file. Follow these steps to test the setup:
 
 ### 1. Verify SMTP Configuration
 
@@ -80,6 +80,7 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 EMAIL_FROM=your-email@gmail.com
 TECH_SUPPORT_EMAIL=techsupport@example.com
+CUSTOMER_SUPPORT-EMAIL=customersupport@example.com
 ```
 
 - Replace `your-email@gmail.com` with your Gmail address.
@@ -144,18 +145,13 @@ docusign-data-transfer/
 
 ---
 
-## Running the Application
+## Running the Application (from backend-app directory)
 
 Start the server/application:
 
 ```bash
 npm start
 ```
-
----
-
-## Testing
-
 
 
 # DocuSign Integarion
