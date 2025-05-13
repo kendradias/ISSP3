@@ -36,19 +36,3 @@ const __dirname = dirname(__filename);
 testFile('Empty');
 testFile('No');
 testFile('Num');
-
-// const filePath = path.join(__dirname, '../data/samples/testEmptyDate.json');
-// const rawData = fs.readFileSync(filePath, 'utf-8');
-// const jsonData = JSON.parse(rawData);
-
-// axios.post('http://localhost:3000/webhook/docusign-webhook', jsonData, {
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// })
-// .then(res => {
-//   console.log('✅ Success:', res.data);
-// })
-// .catch(err => {
-//   console.error('❌ Error:', err.response?.data || err.message);
-// });
