@@ -12,7 +12,7 @@ export interface IStatusHistory extends Document {
 
 const statusHistorySchema =  new mongoose.Schema({
     envelopeId: {type: String, required: true, index: true},
-    signerEmail: {type: String, required: true},
+    signerEmail: {type: String},
     status: {type: String, required: true},
     previousStatus: {type: String, default: null},
     timestamp: {type: Date, default: Date.now},
